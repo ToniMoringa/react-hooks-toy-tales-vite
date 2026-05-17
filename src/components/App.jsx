@@ -1,25 +1,44 @@
-import React, { useState } from "react";
-
-import Header from "./Header";
-import ToyForm from "./ToyForm";
-import ToyContainer from "./ToyContainer";
+import { useState, useEffect } from 'react';
+import Header from './Header';
+import ToyForm from './ToyForm';
+import ToyContainer from './ToyContainer';
 
 function App() {
-  const [showForm, setShowForm] = useState(false);
+  const [toys, setToys] = useState([]);
 
-  function handleClick() {
-    setShowForm((showForm) => !showForm);
-  }
+  useEffect(() => {
+    fetch('http://localhost:3001/toys')
+      .then((response) => response.json())
+      .then((data) => setToys(data))
+      .catch((error) => console.error('Error fetching toys:', error));
+  }, []);
+
+  const handleAddToy = (newToy) => {
+    setToys([...toys, newToy]);
+  };
+
+  const handleDeleteToy = (toyId) => {
+    setToys(toys.filter((toy) => toy.id !== toyId));
+  };
+
+  const handleLikeToy = (updatedToy) => {
+    const updatedToys = toys.map((toy) =>
+      toy.id === updatedToy.id ? updatedToy : toy,
+    );
+    setToys(updatedToys);
+  };
 
   return (
-    <>
+    <div className="app">
       <Header />
-      {showForm ? <ToyForm /> : null}
-      <div className="buttonContainer">
-        <button onClick={handleClick}>Add a Toy</button>
-      </div>
-      <ToyContainer />
-    </>
+      <h1>Toy Tales</h1>
+      <ToyForm onAddToy={handleAddToy} />
+      <ToyContainer
+        toys={toys}
+        onDeleteToy={handleDeleteToy}
+        onLikeToy={handleLikeToy}
+      />
+    </div>
   );
 }
 
